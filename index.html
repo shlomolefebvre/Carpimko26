@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulateur CARPIMKO 2026</title>
+  <meta name="description" content="Estimez vos cotisations CARPIMKO 2026 à partir de votre assiette sociale 2025.">
+  <style>
+    :root {
+      --ink: #12312e;
+      --ink-soft: #365652;
+      --paper: #f4f1e8;
+      --card: #fffdf7;
+      --line: #d9d7ca;
+      --mint: #a9e6d1;
+      --mint-dark: #0c7963;
+      --peach: #f5c8a8;
+      --blue: #a9cce4;
+      --lilac: #c8c3e5;
+      --orange: #e87845;
+      --shadow: 0 18px 45px rgba(18, 49, 46, .08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 7% 2%, rgba(169, 230, 209, .36), transparent 25rem),
+        var(--paper);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+
+    .topbar {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid rgba(18, 49, 46, .12);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 850; letter-spacing: -.02em; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      background: var(--ink); color: white; border-radius: 11px; font: 700 20px Georgia, serif;
+    }
+    .year {
+      padding: 6px 11px; border: 1px solid rgba(18, 49, 46, .18); border-radius: 999px;
+      color: var(--ink-soft); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .print-button, .copy-button {
+      border: 0; border-radius: 11px; cursor: pointer; font-weight: 800;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .print-button { padding: 9px 13px; background: rgba(255,255,255,.52); }
+    .print-button:hover, .copy-button:hover { transform: translateY(-1px); }
+
+    .hero { padding: 62px 0 36px; max-width: 910px; }
+    .eyebrow { color: var(--mint-dark); font-size: 12px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    h1 {
+      margin: 14px 0 18px; max-width: 880px;
+      font: 500 clamp(42px, 6vw, 76px)/.98 Georgia, "Times New Roman", serif;
+      letter-spacing: -.045em;
+    }
+    .hero p { margin: 0; max-width: 720px; color: var(--ink-soft); font-size: 18px; }
+
+    main { display: grid; grid-template-columns: minmax(310px, .84fr) minmax(480px, 1.35fr); gap: 24px; padding-bottom: 74px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .inputs { align-self: start; position: sticky; top: 18px; padding: 25px; }
+    .section-kicker { color: var(--mint-dark); font-weight: 900; font-size: 11px; letter-spacing: .11em; text-transform: uppercase; }
+    .section-title { margin: 5px 0 5px; font: 500 26px/1.15 Georgia, serif; letter-spacing: -.02em; }
+    .section-help { margin: 0 0 22px; color: var(--ink-soft); font-size: 13px; }
+
+    .mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; background: #eeece3; border-radius: 14px; }
+    .mode-switch button {
+      min-height: 48px; padding: 7px 9px; border: 0; border-radius: 10px; background: transparent;
+      cursor: pointer; color: var(--ink-soft); font-size: 12px; font-weight: 800; line-height: 1.25;
+    }
+    .mode-switch button.active { background: white; color: var(--ink); box-shadow: 0 4px 12px rgba(18,49,46,.08); }
+    .field { margin-top: 20px; }
+    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 850; }
+    .money-input { position: relative; }
+    .money-input input {
+      width: 100%; height: 56px; padding: 0 51px 0 14px; border: 1px solid #c8c9bd; border-radius: 13px;
+      outline: 0; background: white; color: var(--ink); font-size: 20px; font-weight: 850;
+    }
+    .money-input input:focus { border-color: var(--mint-dark); box-shadow: 0 0 0 3px rgba(12, 121, 99, .13); }
+    .money-input input:disabled { background: #efeee8; color: #66736f; }
+    .money-input span { position: absolute; right: 16px; top: 15px; color: var(--ink-soft); font-weight: 800; }
+    .input-note { display: block; margin-top: 7px; color: #61716e; font-size: 12px; }
+    input[type="range"] { width: 100%; margin: 15px 0 2px; accent-color: var(--mint-dark); }
+    .scale { display: flex; justify-content: space-between; color: #78837f; font-size: 10px; }
+    .quick-values { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 13px; }
+    .quick-values button {
+      border: 1px solid var(--line); background: white; border-radius: 999px; padding: 6px 9px;
+      font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .quick-values button:hover { border-color: var(--mint-dark); color: var(--mint-dark); }
+
+    .divider { height: 1px; margin: 23px 0; background: var(--line); }
+    .checkline {
+      display: grid; grid-template-columns: 21px 1fr; align-items: start; gap: 10px;
+      padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: white;
+    }
+    .checkline input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--mint-dark); }
+    .checkline label { margin: 0; cursor: pointer; }
+    .checkline small { display: block; margin-top: 2px; color: #66736f; font-weight: 450; line-height: 1.35; }
+    .same-line { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 11px; color: #61716e; }
+    .same-line input { margin: 0; accent-color: var(--mint-dark); }
+
+    .results { display: grid; gap: 18px; min-width: 0; }
+    .total-card { position: relative; overflow: hidden; padding: 29px 30px 27px; background: var(--ink); color: white; border: 0; }
+    .total-card::after {
+      content: ""; position: absolute; width: 230px; height: 230px; right: -120px; top: -120px;
+      border: 42px solid rgba(169, 230, 209, .1); border-radius: 50%;
+    }
+    .total-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; position: relative; z-index: 1; }
+    .total-card .section-kicker { color: var(--mint); }
+    .total-card h2 { margin: 5px 0 0; font: 500 24px Georgia, serif; }
+    .status-pill { padding: 6px 10px; border-radius: 999px; background: var(--mint); color: var(--ink); font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .main-total { margin: 26px 0 0; font: 500 clamp(48px, 7vw, 78px)/1 Georgia, serif; letter-spacing: -.045em; position: relative; z-index: 1; }
+    .per-month { color: #c7d7d2; position: relative; z-index: 1; }
+    .per-month strong { color: white; }
+    .total-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 26px; position: relative; z-index: 1; }
+    .total-foot small { color: #aebfba; max-width: 380px; }
+    .copy-button { padding: 9px 12px; background: rgba(255,255,255,.1); color: white; white-space: nowrap; }
+
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--line); gap: 1px; }
+    .metric { padding: 18px; background: var(--card); min-width: 0; }
+    .metric span { display: block; min-height: 36px; color: #61716e; font-size: 11px; line-height: 1.35; }
+    .metric strong { display: block; margin-top: 8px; font: 500 25px Georgia, serif; white-space: nowrap; }
+    .metric small { display: block; margin-top: 4px; color: #71807c; font-size: 10px; }
+
+    .breakdown, .thresholds, .method { padding: 25px 27px; }
+    .composition { margin: 21px 0 24px; }
+    .bar { display: flex; width: 100%; height: 14px; overflow: hidden; background: #eceae1; border-radius: 999px; }
+    .bar span { display: block; min-width: 2px; transition: width .25s ease; }
+    .bar .base { background: var(--mint-dark); }
+    .bar .comp { background: var(--peach); }
+    .bar .asv { background: #6aaad1; }
+    .bar .id { background: var(--lilac); }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; color: #61716e; font-size: 10px; }
+    .legend i { width: 8px; height: 8px; display: inline-block; border-radius: 50%; margin-right: 5px; }
+
+    .rows { border-top: 1px solid var(--line); }
+    .regime-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .regime-row:last-child { border-bottom: 0; }
+    .regime-name { font-weight: 850; }
+    .regime-detail { margin-top: 3px; color: #687772; font-size: 11px; }
+    .regime-amount { text-align: right; font-weight: 900; white-space: nowrap; }
+    .regime-amount small { display: block; color: #71807c; font-size: 10px; font-weight: 600; }
+    .regime-row.subtotal { margin-top: 3px; padding-top: 18px; border-top: 2px solid var(--ink); }
+    .regime-row.subtotal .regime-name, .regime-row.subtotal .regime-amount { font-size: 17px; }
+    .cpam-row { margin-top: 15px; padding: 14px 15px; border-radius: 13px; background: #e8f5f0; display: flex; justify-content: space-between; gap: 12px; }
+    .cpam-row span { color: #41635c; font-size: 12px; }
+    .cpam-row strong { color: var(--mint-dark); white-space: nowrap; }
+
+    .threshold-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 17px; }
+    .threshold { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .threshold.active { border-color: #e6b18d; background: #fff3e9; }
+    .threshold span { display: block; color: #64736f; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; }
+    .threshold strong { display: block; margin: 5px 0 3px; font-size: 13px; }
+    .threshold small { color: #71807c; font-size: 10px; }
+    .callout { margin-top: 16px; padding: 13px 15px; border-left: 3px solid var(--orange); background: #fff4e9; border-radius: 0 11px 11px 0; color: #684b3b; font-size: 12px; }
+
+    .formula-grid { display: grid; grid-template-columns: auto 1fr; gap: 9px 13px; margin-top: 17px; font-size: 12px; }
+    .formula-grid b { color: var(--mint-dark); }
+    .formula-grid span { color: #5f706b; }
+    .source-note { margin: 17px 0 0; padding-top: 15px; border-top: 1px solid var(--line); color: #687772; font-size: 11px; }
+    .source-note a { color: var(--mint-dark); font-weight: 800; }
+    .disclaimer { padding: 17px 20px; border: 1px solid #e2caa8; border-radius: 16px; background: #fff8e8; color: #695a43; font-size: 11px; }
+    .disclaimer strong { color: #735121; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 10; transform: translate(-50%, 18px);
+      padding: 10px 14px; border-radius: 999px; opacity: 0; pointer-events: none;
+      background: var(--ink); color: white; box-shadow: var(--shadow); font-size: 12px; font-weight: 800;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 880px) {
+      .hero { padding-top: 42px; }
+      main { grid-template-columns: 1fr; }
+      .inputs { position: static; }
+      .metric strong { font-size: 22px; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 22px, 1180px); }
+      .topbar { min-height: 62px; }
+      .print-button { display: none; }
+      .hero { padding: 36px 2px 27px; }
+      h1 { font-size: 42px; }
+      .hero p { font-size: 15px; }
+      .inputs, .breakdown, .thresholds, .method { padding: 21px 18px; }
+      .total-card { padding: 24px 20px; }
+      .main-total { font-size: 48px; }
+      .total-foot { align-items: end; }
+      .metrics { grid-template-columns: 1fr; }
+      .metric { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; }
+      .metric span { min-height: 0; }
+      .metric strong { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+      .threshold-list { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; }
+      .wrap { width: 100%; }
+      .topbar { min-height: 45px; }
+      .print-button, .copy-button, .quick-values, input[type="range"] { display: none; }
+      .hero { padding: 25px 0 18px; }
+      h1 { font-size: 42px; }
+      main { grid-template-columns: .75fr 1.25fr; gap: 12px; }
+      .inputs { position: static; padding: 17px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .results { gap: 10px; }
+      .thresholds, .method { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">C</span><span>CARPIMKO · simulateur</span></div>
+      <div style="display:flex;align-items:center;gap:9px"><span class="year">Barème 2026</span><button class="print-button" type="button" onclick="window.print()">Imprimer</button></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Retraite · prévoyance</div>
+      <h1>Vos cotisations 2026, sans calculatrice.</h1>
+      <p>Entrez votre assiette sociale 2025 pour obtenir le montant annuel à votre charge, la prise en charge CPAM et le détail des quatre régimes.</p>
+    </section>
+
+    <main>
+      <aside class="card inputs">
+        <div class="section-kicker">Vos données</div>
+        <h2 class="section-title">Base de calcul</h2>
+        <p class="section-help">Choisissez le montant que vous avez sous la main.</p>
+
+        <div class="mode-switch" role="group" aria-label="Mode de calcul">
+          <button type="button" class="active" data-mode="assiette" aria-pressed="true">Je connais mon<br>assiette sociale</button>
+          <button type="button" data-mode="brut" aria-pressed="false">Je pars du revenu<br>brut social</button>
+        </div>
+
+        <div class="field">
+          <label for="mainIncome" id="mainIncomeLabel">Assiette sociale 2025</label>
+          <div class="money-input"><input id="mainIncome" inputmode="decimal" autocomplete="off" value="50 000" aria-describedby="incomeNote"><span>€</span></div>
+          <small class="input-note" id="incomeNote">Montant transmis par l’Urssaf à la CARPIMKO.</small>
+          <input id="incomeRange" type="range" min="0" max="300000" step="500" value="50000" aria-label="Ajuster le montant">
+          <div class="scale"><span>0 €</span><span>150 k€</span><span>300 k€+</span></div>
+          <div class="quick-values" aria-label="Montants rapides">
+            <button type="button" data-value="25000">25 k€</button><button type="button" data-value="50000">50 k€</button>
+            <button type="button" data-value="80000">80 k€</button><button type="button" data-value="120000">120 k€</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="checkline">
+          <input id="conventionne" type="checkbox" checked>
+          <label for="conventionne">Praticien conventionné<small>Active l’avantage social vieillesse (ASV) et la participation de la CPAM.</small></label>
+        </div>
+
+        <div class="field" id="convField">
+          <label for="convIncome">Assiette sociale conventionnée 2025</label>
+          <div class="money-input"><input id="convIncome" inputmode="decimal" autocomplete="off" value="50 000"><span>€</span></div>
+          <label class="same-line"><input id="sameIncome" type="checkbox" checked> Utiliser la même assiette que ci-dessus</label>
+        </div>
+      </aside>
+
+      <section class="results" aria-live="polite">
+        <article class="card total-card">
+          <div class="total-head">
+            <div><div class="section-kicker">Estimation annuelle</div><h2>Total à votre charge</h2></div>
+            <span class="status-pill" id="statusPill">Conventionné</span>
+          </div>
+          <div class="main-total" id="annualTotal">—</div>
+          <div class="per-month">soit <strong id="monthlyTotal">—</strong> par mois</div>
+          <div class="total-foot"><small>CARPIMKO uniquement · hors cotisations Urssaf et impôt sur le revenu</small><button class="copy-button" id="copyButton" type="button">Copier le résumé</button></div>
+        </article>
+
+        <div class="metrics">
+          <div class="metric"><span>Assiette sociale retenue</span><strong id="socialBase">—</strong><small id="sourceBase">déclarée</small></div>
+          <div class="metric"><span>Prise en charge CPAM</span><strong id="cpamTotal">—</strong><small>ASV forfaitaire + proportionnelle</small></div>
+          <div class="metric"><span>Taux apparent à votre charge</span><strong id="effectiveRate">—</strong><small>total ÷ assiette sociale</small></div>
+        </div>
+
+        <article class="card breakdown">
+          <div class="section-kicker">Résultat</div>
+          <h2 class="section-title">Détail par régime</h2>
+          <p class="section-help">Les montants affichés sont ceux restant à votre charge.</p>
+          <div class="composition">
+            <div class="bar" aria-label="Répartition des cotisations"><span class="base" id="barBase"></span><span class="comp" id="barComp"></span><span class="asv" id="barAsv"></span><span class="id" id="barId"></span></div>
+            <div class="legend"><span><i style="background:var(--mint-dark)"></i>Base</span><span><i style="background:var(--peach)"></i>Complémentaire</span><span><i style="background:#6aaad1"></i>ASV</span><span><i style="background:var(--lilac)"></i>Invalidité-décès</span></div>
+          </div>
+          <div class="rows" id="breakdownRows"></div>
+          <div class="cpam-row"><span>Participation CPAM non prélevée sur vous</span><strong id="cpamCallout">—</strong></div>
+        </article>
+
+        <article class="card thresholds">
+          <div class="section-kicker">Lecture du barème</div>
+          <h2 class="section-title">Où se situe votre assiette ?</h2>
+          <div class="threshold-list" id="thresholdList"></div>
+          <div class="callout" id="thresholdCallout"></div>
+        </article>
+
+        <article class="card method">
+          <div class="section-kicker">Méthode</div>
+          <h2 class="section-title">Formules appliquées</h2>
+          <div class="formula-grid">
+            <b>Base T1</b><span>8,73 % jusqu’à 48 060 €</span>
+            <b>Base T2</b><span>1,87 % jusqu’à 240 300 €</span>
+            <b>Complémentaire</b><span>8,70 %, avec assiette comprise entre 24 030 € et 144 180 €</span>
+            <b>ASV adhérent</b><span>224 € + 0,16 % de l’assiette conventionnée</span>
+            <b>ASV CPAM</b><span>447 € + 0,24 % de l’assiette conventionnée</span>
+            <b>Invalidité-décès</b><span>1 022 € forfaitaires</span>
+          </div>
+          <p class="source-note">Barème vérifié sur la publication officielle <a href="https://www.carpimko.com/je-suis-en-activite/mes-cotisations/mes-cotisations-sadaptent-a-mes-revenus" target="_blank" rel="noreferrer">CARPIMKO — cotisations 2026</a>.</p>
+        </article>
+
+        <div class="disclaimer"><strong>Estimation indicative.</strong> Le simulateur applique le barème annuel fourni pour une affiliation sur l’année entière. Il ne simule ni proratisation, ni exonération, ni régularisation d’appels provisionnels. Votre appel de cotisations CARPIMKO reste la référence.</div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status">Résumé copié</div>
+
+  <script>
+    const RULES = {
+      pass: 48060,
+      baseT1Rate: .0873,
+      baseT2Rate: .0187,
+      baseT2Ceiling: 240300,
+      compRate: .087,
+      compFloor: 24030,
+      compCeiling: 144180,
+      asvMemberFixed: 224,
+      asvCpamFixed: 447,
+      asvMemberRate: .0016,
+      asvCpamRate: .0024,
+      disability: 1022
+    };
+
+    const byId = id => document.getElementById(id);
+    const euro = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    const percent = new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const number = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
+    let mode = 'assiette';
+    let currentResult = null;
+
+    function parseAmount(value) {
+      const cleaned = String(value).replace(/\s/g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
+      return Math.max(0, Number.parseFloat(cleaned) || 0);
+    }
+
+    function formatInput(value) { return number.format(Math.round(value)); }
+
+    function calculate(assiette, convAssiette, conventionne) {
+      const baseT1 = Math.min(assiette, RULES.pass) * RULES.baseT1Rate;
+      const baseT2 = Math.min(assiette, RULES.baseT2Ceiling) * RULES.baseT2Rate;
+      const base = baseT1 + baseT2;
+      const compBase = Math.min(RULES.compCeiling, Math.max(RULES.compFloor, assiette));
+      const complementary = compBase * RULES.compRate;
+      const asvMemberProp = conventionne ? convAssiette * RULES.asvMemberRate : 0;
+      const asvCpamProp = conventionne ? convAssiette * RULES.asvCpamRate : 0;
+      const asvMember = conventionne ? RULES.asvMemberFixed + asvMemberProp : 0;
+      const asvCpam = conventionne ? RULES.asvCpamFixed + asvCpamProp : 0;
+      const disability = RULES.disability;
+      const memberTotal = base + complementary + asvMember + disability;
+      return { assiette, convAssiette, conventionne, baseT1, baseT2, base, compBase, complementary, asvMemberProp, asvCpamProp, asvMember, asvCpam, disability, memberTotal, globalTotal: memberTotal + asvCpam };
+    }
+
+    function getInputs() {
+      const entered = parseAmount(byId('mainIncome').value);
+      const assiette = mode === 'brut' ? entered * .74 : entered;
+      if (byId('sameIncome').checked) byId('convIncome').value = formatInput(assiette);
+      const convAssiette = byId('sameIncome').checked ? assiette : parseAmount(byId('convIncome').value);
+      return { entered, assiette, convAssiette, conventionne: byId('conventionne').checked };
+    }
+
+    function row(name, detail, amount, note = '') {
+      return `<div class="regime-row"><div><div class="regime-name">${name}</div><div class="regime-detail">${detail}</div></div><div class="regime-amount">${euro.format(amount)}${note ? `<small>${note}</small>` : ''}</div></div>`;
+    }
+
+    function renderThresholds(r) {
+      const items = [
+        { title: '1 PASS', value: '48 060 €', desc: 'plafond de la tranche 1', active: r.assiette >= RULES.pass },
+        { title: '0,5 PASS', value: '24 030 €', desc: 'plancher complémentaire', active: r.assiette <= RULES.compFloor },
+        { title: '3 PASS', value: '144 180 €', desc: 'plafond complémentaire', active: r.assiette >= RULES.compCeiling },
+        { title: '5 PASS', value: '240 300 €', desc: 'plafond de la tranche 2', active: r.assiette >= RULES.baseT2Ceiling }
+      ];
+      byId('thresholdList').innerHTML = items.map(x => `<div class="threshold ${x.active ? 'active' : ''}"><span>${x.title}</span><strong>${x.value}</strong><small>${x.desc}</small></div>`).join('');
+
+      let message;
+      if (r.assiette < RULES.compFloor) message = `Le minimum du régime complémentaire s’applique : la cotisation est calculée sur 24 030 €, et non sur ${euro.format(r.assiette)}.`;
+      else if (r.assiette >= RULES.baseT2Ceiling) message = 'Les deux tranches du régime de base et le régime complémentaire ont atteint leur plafond.';
+      else if (r.assiette >= RULES.compCeiling) message = 'Le régime complémentaire est plafonné ; seule la tranche 2 du régime de base continue d’augmenter jusqu’à 240 300 €.';
+      else if (r.assiette >= RULES.pass) message = 'La tranche 1 du régime de base est plafonnée ; la tranche 2 et le régime complémentaire continuent d’augmenter.';
+      else message = 'Votre assiette se situe sous 1 PASS : les deux tranches du régime de base s’appliquent à la totalité du montant.';
+      byId('thresholdCallout').textContent = message;
+    }
+
+    function render() {
+      const inputs = getInputs();
+      const r = calculate(inputs.assiette, inputs.convAssiette, inputs.conventionne);
+      currentResult = r;
+
+      byId('annualTotal').textContent = euro.format(r.memberTotal);
+      byId('monthlyTotal').textContent = euro.format(r.memberTotal / 12);
+      byId('socialBase').textContent = euro.format(r.assiette);
+      byId('sourceBase').textContent = mode === 'brut' ? `74 % de ${euro.format(inputs.entered)}` : 'assiette saisie';
+      byId('cpamTotal').textContent = euro.format(r.asvCpam);
+      byId('effectiveRate').textContent = r.assiette > 0 ? percent.format(r.memberTotal / r.assiette) : '—';
+      byId('statusPill').textContent = r.conventionne ? 'Conventionné' : 'Non conventionné';
+
+      byId('breakdownRows').innerHTML =
+        row('Régime de base', `T1 : ${euro.format(r.baseT1)} · T2 : ${euro.format(r.baseT2)}`, r.base, 'à votre charge') +
+        row('Régime complémentaire', `8,70 % de ${euro.format(r.compBase)}`, r.complementary, r.compBase === RULES.compFloor && r.assiette < RULES.compFloor ? 'minimum appliqué' : (r.compBase === RULES.compCeiling && r.assiette > RULES.compCeiling ? 'maximum appliqué' : 'à votre charge')) +
+        row('Avantage social vieillesse', r.conventionne ? `224 € + 0,16 % de ${euro.format(r.convAssiette)}` : 'Non applicable au praticien non conventionné', r.asvMember, r.conventionne ? 'part adhérent' : '') +
+        row('Invalidité-décès', 'Cotisation forfaitaire annuelle', r.disability, 'à votre charge') +
+        `<div class="regime-row subtotal"><div class="regime-name">Total estimé</div><div class="regime-amount">${euro.format(r.memberTotal)}<small>${euro.format(r.memberTotal / 12)} / mois</small></div></div>`;
+      byId('cpamCallout').textContent = euro.format(r.asvCpam);
+
+      const parts = [['barBase', r.base], ['barComp', r.complementary], ['barAsv', r.asvMember], ['barId', r.disability]];
+      parts.forEach(([id, value]) => byId(id).style.width = `${r.memberTotal ? value / r.memberTotal * 100 : 0}%`);
+      renderThresholds(r);
+    }
+
+    function updateMode(nextMode) {
+      const oldInputs = getInputs();
+      mode = nextMode;
+      document.querySelectorAll('[data-mode]').forEach(button => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      byId('mainIncomeLabel').textContent = mode === 'assiette' ? 'Assiette sociale 2025' : 'Revenu brut social 2025';
+      byId('incomeNote').textContent = mode === 'assiette' ? 'Montant transmis par l’Urssaf à la CARPIMKO.' : 'L’assiette sera estimée après l’abattement réglementaire de 26 %.';
+      const converted = mode === 'brut' ? oldInputs.assiette / .74 : oldInputs.assiette;
+      byId('mainIncome').value = formatInput(converted);
+      byId('incomeRange').value = Math.min(300000, converted);
+      render();
+    }
+
+    document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => updateMode(button.dataset.mode)));
+    document.querySelectorAll('[data-value]').forEach(button => button.addEventListener('click', () => {
+      byId('mainIncome').value = formatInput(Number(button.dataset.value));
+      byId('incomeRange').value = button.dataset.value;
+      render();
+    }));
+    byId('mainIncome').addEventListener('input', () => {
+      byId('incomeRange').value = Math.min(300000, parseAmount(byId('mainIncome').value));
+      render();
+    });
+    byId('mainIncome').addEventListener('blur', () => { byId('mainIncome').value = formatInput(parseAmount(byId('mainIncome').value)); render(); });
+    byId('incomeRange').addEventListener('input', () => { byId('mainIncome').value = formatInput(byId('incomeRange').value); render(); });
+    byId('convIncome').addEventListener('input', render);
+    byId('convIncome').addEventListener('blur', () => { byId('convIncome').value = formatInput(parseAmount(byId('convIncome').value)); render(); });
+    byId('sameIncome').addEventListener('change', () => { byId('convIncome').disabled = byId('sameIncome').checked; render(); });
+    byId('conventionne').addEventListener('change', () => {
+      const active = byId('conventionne').checked;
+      byId('convField').style.display = active ? '' : 'none';
+      render();
+    });
+
+    byId('copyButton').addEventListener('click', async () => {
+      const r = currentResult;
+      const text = `Estimation CARPIMKO 2026\nAssiette sociale : ${euro.format(r.assiette)}\nRégime de base : ${euro.format(r.base)}\nRégime complémentaire : ${euro.format(r.complementary)}\nASV à ma charge : ${euro.format(r.asvMember)}\nInvalidité-décès : ${euro.format(r.disability)}\nTotal à ma charge : ${euro.format(r.memberTotal)} (${euro.format(r.memberTotal / 12)} / mois)\nPrise en charge CPAM : ${euro.format(r.asvCpam)}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        byId('toast').textContent = 'Résumé copié';
+      } catch (_) {
+        byId('toast').textContent = 'Copie indisponible dans ce navigateur';
+      }
+      byId('toast').classList.add('show');
+      setTimeout(() => byId('toast').classList.remove('show'), 1800);
+    });
+
+    byId('convIncome').disabled = true;
+    render();
+  </script>
+</body>
+</html>
